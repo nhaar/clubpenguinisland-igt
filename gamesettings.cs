@@ -52,7 +52,7 @@ public void ResetRun()
 {
 	ZoneTransitionService.isSpeedrunning = false;
 	ZoneTransitionService.isRunFinished = false;
-	ZoneTransitionService.saveData("runnning", "False");
+	ZoneTransitionService.saveData("running", "False");
 	ZoneTransitionService.saveData("ended", "False");
 }
 
@@ -189,4 +189,5 @@ public void ChangeAlignment()
 	{
 		ZoneTransitionService.textAlignOption = 1;
 	}
+	ZoneTransitionService.saveData("align", ZoneTransitionService.textAlignOption.ToString());
 }
