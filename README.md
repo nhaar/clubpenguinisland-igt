@@ -12,7 +12,7 @@ The in-game timer is displayed on the screen. You can change the timer settings 
 
 ## Splits
 
-The game will log the splits of the current run in the `Client\ClubPenguinIsland_Data\IGT_Data\splits` file. This is just to save the time of performing additions in case you think you got a PB in one of the ILs.
+The game will log the splits of the current run in the `Client\ClubPenguinIsland_Data\IGT_Data\splits` file. This is just to spare the time of performing operations and checking in case you think you got a PB in one of the ILs.
 
 # Limitations
 
@@ -24,10 +24,10 @@ The game will log the splits of the current run in the `Client\ClubPenguinIsland
 
 * If you manage to somehow close the game and swap to a new instance in less than 150 ms, you could technically lose time because the load remover won't be working yet. It shouldn't be possible for a human to swap the instances that quickly, but it's important to keep that in mind for TASing.
 
-* The timer will not work properly if you alter the IGT_Data folder, and the timer may either stop working or display innacurate times.
+* The timer will not work properly if you alter the IGT_Data folder, and it may either stop working or display innacurate times.
 
 # Editing The Game (Only for people who want to contribute to this mod)
 
 The code in this repository contains C# code meant to be injected into the decompiled game code. I recommend using [dnSpy](https://github.com/dnSpy/dnSpy) to decompile and edit the code.
 
-To inject the code properly, first change the LoadingController class in the Disney.Kelowna.Common namespace in UnityShared.dll just like in  `loadingcontroller.cs `. Then, change the main script, which should be one that runs every frame and is initialized at the beginning, according to  `main.cs `. I've picked ZoneTransitionService from the ClubPenguin namespace in ReMix-Game.dll, if that is to be changed the other code will need to be changed too. The other two things to change are the QuestService class, in the ClubPenguin.Adventure namespace and the GameSettings class in the ClubPenguin namespace, both of which are in ReMix-Game.dll. For those, you can copy the code in  `questservice.cs ` and  `gamesettings.cs `. If you are using dnSpy and you get a compiling error, make sure you are editing a method and not the class, and if you are still getting a weird decompile issue, close the dll you are editing and open it again as that (this always happens to me a few times in the same few scrips).
+To inject the code properly, first change the LoadingController class in the Disney.Kelowna.Common namespace in UnityShared.dll just like in  `loadingcontroller.cs `. Then, change the main script, which should be one that runs every frame and is initialized at the beginning, according to  `main.cs `. I've picked ZoneTransitionService from the ClubPenguin namespace in ReMix-Game.dll, if that is to be changed the other code will need to be changed too. The other two things to change are the QuestService class, in the ClubPenguin.Adventure namespace and the GameSettings class in the ClubPenguin namespace, both of which are in ReMix-Game.dll. For those, you can copy the code in  `questservice.cs ` and  `gamesettings.cs `. If you are using dnSpy and you get a compiling error, make sure you are editing a method and not the class, and if you are still getting a weird decompile issue, close the dll you are editing and open it again (this always happens to me a few times in the same few scripts).
