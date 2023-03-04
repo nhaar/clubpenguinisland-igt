@@ -8,7 +8,7 @@ Download the dlls provided in the releases tab, place them in your game's `Clien
 
 # Features
 
-The in-game timer is displayed on the screen. You can change the timer settings by opening the game's offline mode menu, which explains in detail what each settings does. The timer uses in-game time (frame count), except for when you close the game in which it will calculate the time spent with the game closed (real time), the final result will be a mix of the game time (which means lag will not influence the time in-game) and real time.
+The in-game timer is displayed on the screen. You can change the timer settings by opening the game's offline mode menu, which explains in detail what each settings does. The timer runs a timer that stopts at each loading screen, and also saves the time between instances.
 
 ## Splits
 
