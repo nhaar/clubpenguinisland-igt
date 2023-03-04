@@ -171,7 +171,10 @@ public void InitializeTimer()
 		// We will do this in a different place though
 		needInit = true;
 		// Also read the splits value
-		splitsString = File.ReadAllText(Application.dataPath + "/IGT_Data/splits");
+		if (File.Exists(Application.dataPath + "/IGT_Data/splits"))
+		{
+			splitsString = File.ReadAllText(Application.dataPath + "/IGT_Data/splits");
+		}
 	}
 	
 }
