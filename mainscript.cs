@@ -405,7 +405,7 @@ public static string getTimer(float insidetime, float outsidetime)
 	int minutes = (int)(total % 3600f / 60f);
 	int seconds = (int)(total % 60f);
 	int miliseconds = (int)Mathf.Round(total % 1f * 1000f);
-	if (miliseconds == 10000)
+	if (miliseconds == 1000)
 	{
 		miliseconds = 0;
 	}
@@ -572,6 +572,7 @@ public static void saveData(string dataname, string datacontent)
 void Awake()
 {
 		//...Other stuff
+		toCheatEngine3 = 222; // Make getting memory adress easier
 		if (!Directory.Exists(Application.dataPath + "/IGT_Data"))
 		{
 			Directory.CreateDirectory(Application.dataPath + "/IGT_Data");
