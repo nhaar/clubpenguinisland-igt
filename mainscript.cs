@@ -318,6 +318,8 @@ public static void startTimer()
 		isRunFinished = false;
 		outsideTimeCount = 0f;
 		insideTimeCount = 0;
+		TimeCountStart = Time.realtimeSinceStartup;
+		runTimeOnLoadEnd = 0f;
 		saveData("running", "True");
 		// Command to start splits
 		shouldStartSplit = true;
