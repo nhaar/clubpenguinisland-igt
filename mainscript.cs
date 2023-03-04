@@ -77,6 +77,8 @@ public void InitializeTimer()
 				case 3:
 					insideTimeCount = float.Parse(fileContents);
 					initialTimeIn = insideTimeCount;
+					runTimeOnLoadEnd = insideTimeCount;
+					TimeCountStart = currentElapsedTime;
 					break;
 				case 4:
 					outsideTimeCount = float.Parse(fileContents);
@@ -275,8 +277,7 @@ public void Update()
 	//
 	saveSystemTime = DateTime.Now;
 	// Since realtimeSinceStartup depends on when in the frame you are we'll define it at the beginning of each frame
-	// Also this is where you should change if you want to change the timing method to a different one like Time.time
-	currentElapsedTime = Time.realtimeSinceStartup;
+	currentElapsedTime = realtimeSinceStartup;
 	//Save the time variable (don't do it at LateUpdate because there it'll save the time of almost the next frame)
 	if (!isMainInstance)
 	{
