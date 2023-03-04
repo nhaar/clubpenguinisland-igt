@@ -9,8 +9,11 @@ using System. IO;
 public static bool isMainInstance; // Keeps track on whether this instance is the main instance, which will control the timer, as opposed to an instance running in the background
 public static int instanceNo; // Keeps track on which is the number of the instance in the order that it was opened
 public static string timerMode; // Keeps track of the timer mode, which controls what ends the timer
-public static float realTimeCount; // All the real time that we will keep track off, this only consists of the time between closing games, as our main timing method will be frame counting
-public static int frameTimeCount; // All the counted frames
+public static float currentElapsedTime; // to keep track of the time each frame
+public static float outsideTimeCount; // All the time spent outside the game, between closing instances
+public static float insideTimeCount; // All the time spent in the actual game
+public static float TimeCountStart; // We will use relative time to add to the timer, we  will update this whenever we want to start counting
+public static float runTimeOnLoadEnd; // To keep track of the time at the end of each load
 public static bool isSpeedrunning; // Keeps track of whether the time is running or not
 public static bool isRunFinished; // Keeps track if the time is currently stopped after completing a run
 public static int displayTimerFlag; // Keeps track if the time should be displayed
@@ -18,14 +21,13 @@ public static bool startedLoadTimer; // Used to keep track of whether we started
 public static int toCheatEngine; // Variables meant to be read by livesplit, use this to make finding the addresses with CheatEngine very fast
 public static int toCheatEngine2;
 public static int toCheatEngine3;
-public static float frameRate = 60.0f; // Will hopefully make this automatic in the future, but for now framerate is hard-coded, the game real framerate changes on your refresh rate however
-public static DateTime saveRealTime; // These two variables will hold the information of the current time and framecount for when the game closes
-public static int saveFrameTime;
+public static DateTime saveSystemTime; // These two variables will hold the information of the current times for when the game closes
+public static float saveTimeIn;
 public static bool needInit; // Will be used to keep track of whether the time between instances needs to be initialized
-public static int initializedFrameCount;
+public static float initialTimeIn;
 public static bool startTimeNow; // The timer will start in this frame if this is true
-public static float splitStartRealTime; // These two variables will be used to keep track of splits and will keep track of the time at the beginning of each split
-public static int splitStartFrameCount;
+public static float splitStartTimeIn; // These two variables will be used to keep track of splits and will keep track of the time at the beginning of each split
+public static float splitStartTimeOut;
 public static bool shouldStartSplit;
 public static string splitsString; // String that has splits split across lines
 public static int displayMode; // settings for displaying the mode
@@ -44,8 +46,8 @@ public void InitializeTimer()
 	// The two switches handle the cases of reading and creating the files
 	
 	string timerDataPath = Application.dataPath + "/IGT_Data/";
-	string[] fileArray = new string[] {"mode", "running", "ended", "frames", "transition", "display", "splitf", "splitt", "displaymode", "fontsize", "align"};
-	// mode = timer mode // running = if a run is happening // ended = if a run was finished // frames = frame count // transition = real time counted from instance transition // display = if the timer should be displayed
+	string[] fileArray = new string[] {"mode", "running", "ended", "timein", "timeout", "display", "splitin", "splitout", "displaymode", "fontsize", "align"};
+	// mode = timer mode // running = if is in a run // ended = if have finished a run // timein = time spent inside game // timeout = time spent outside game // display = display timer
 	string[] pathArray = new string[fileArray.Length];
 	// Create an array for the modes, turn that into array with the file path and below we will iterate through everything to properly initialize the data
 	for (int i = 0; i < fileArray.Length; i++)
@@ -73,20 +75,20 @@ public void InitializeTimer()
 					isRunFinished = bool.Parse(fileContents);
 					break;
 				case 3:
-					frameTimeCount = int.Parse(fileContents);
-					initializedFrameCount = frameTimeCount;
+					insideTimeCount = float.Parse(fileContents);
+					initialTimeIn = insideTimeCount;
 					break;
 				case 4:
-					realTimeCount = float.Parse(fileContents);
+					outsideTimeCount = float.Parse(fileContents);
 					break;
 				case 5:
 					displayTimerFlag = int.Parse(fileContents);
 					break;
 				case 6:
-					splitStartFrameCount = int.Parse(fileContents);
+					splitStartTimeIn = float.Parse(fileContents);
 					break;
 				case 7:
-					splitStartRealTime = float.Parse(fileContents);
+					splitStartTimeOut = float.Parse(fileContents);
 					break;
 				case 8:
 					displayMode = int.Parse(fileContents);
@@ -123,11 +125,11 @@ public void InitializeTimer()
 					break;
 				case 3:
 					initContent = "0";
-					frameTimeCount = 0;
+					insideTimeCount = 0f;
 					break;
 				case 4:
 					initContent = "0";
-					realTimeCount = 0f;
+					outsideTimeCount = 0f;
 					break;
 				case 5:
 					initContent = "1";
@@ -135,11 +137,11 @@ public void InitializeTimer()
 					break;
 				case 6:
 					initContent = "0";
-					splitStartFrameCount = 0;
+					splitStartTimeIn = 0f;
 					break;
 				case 7:
 					initContent = "0";
-					splitStartRealTime = 0f;
+					splitStartTimeOut = 0f;
 					break;
 				case 8:
 					initContent = "4";
@@ -166,6 +168,8 @@ public void InitializeTimer()
 		// If in a run, we must fetch when the last instance closed and add it to the count
 		// We will do this in a different place though
 		needInit = true;
+		// Also read the splits value
+		splitsString = File.ReadAllText(Application.dataPath + "/IGT_Data/splits");
 	}
 	
 }
@@ -182,40 +186,36 @@ private void OnApplicationQuit()
 	// Deletes the instance log file when the game closes
 	File.Delete(Application.dataPath + "/IGT_Data/InstancesLog/" + instanceNo);
 	// Write what time this is being closed and the timer data for this run
-	// Since this script actually runs a bit after the frames stop updating, I have prepared the variables
-	string pathOfData = Application.dataPath + "/IGT_Data/";
-	StreamWriter writeCloseTime = new StreamWriter(pathOfData + "close");
-	writeCloseTime.Write(saveRealTime.ToString("yyyy-MM-dd HH:mm:ss.fff"));
-	writeCloseTime.Close();
-	StreamWriter writeGameTime = new StreamWriter(pathOfData + "frames");
-	StreamWriter writeRealTime = new StreamWriter(pathOfData + "transition");
-	writeGameTime.Write(saveFrameTime.ToString());
-	writeRealTime.Write(realTimeCount.ToString());
-	writeGameTime.Close();
-	writeRealTime.Close();
-	saveData("splitf", splitStartFrameCount.ToString());
-	saveData("splitt", splitStartRealTime.ToString());
+	// Since this script actually runs a bit after the frames stop updating, I have prepared the variables saveSystemTime and insideTimeCount at a specific snapshot
+	saveData("close", saveSystemTime.ToString("yyyy-MM-dd HH:mm:ss.fff"));
+	saveData("timein", insideTimeCount.ToString());
+	saveData("timeout", outsideTimeCount.ToString());
+	saveData("splitf", splitStartTimeIn.ToString());
+	saveData("splitt", splitStartTimeOut.ToString());
 }
 
 public void LateUpdate()
 {
-	// This script keeps track of when the game is loading and updates the frame count for the game
+	// The main timer script
+	// This script keeps track of when the game is loading and updates the time when it's not
 	// It's what basically takes care of the game, we use LateUpdate because LoadingController won't update on time for us and we want to wait for the loading variable to be updated
 	// We lock this script only for the main instance as it controls the timer
 	// And of course lock it in case we are not in a run
 	if (isMainInstance && isSpeedrunning)
 	{
-		if(needInit && frameTimeCount > initializedFrameCount + 2)
+		if(needInit && insideTimeCount > initialTimeIn + 0.050f)
 		{
 			// Because this script doesn't update very well in the start, we wait until it starts updating to actually use the real time
-			// So we keep track of the initializedFrameCount to see when it starts moving for real
-			// Number 2 can be tweaked possibly but I think this should be fine
+			// So we keep track of the initialTimeIn to see when it starts moving for real
+			// 50 ms can be tweaked possibly but I think this should be fine
 			needInit = false;
 			DateTime lastInstanceClosed = DateTime.Parse(File.ReadAllText(Application.dataPath + "/IGT_Data/close"));
-			TimeSpan instanceDelta = saveRealTime - lastInstanceClosed;
-			realTimeCount += (float)instanceDelta.TotalSeconds;
+			TimeSpan instanceDelta = saveSystemTime - lastInstanceClosed;
+			outsideTimeCount += (float)instanceDelta.TotalSeconds;
 			//Add the to the real time the time spent between instances
-			frameTimeCount = initializedFrameCount;
+			insideTimeCount = initialTimeIn;
+			TimeCountStart = currentElapsedTime;
+			runTimeOnLoadEnd = insideTimeCount;
 			// Reset the frameCount because before we were using it as a dummy variable
 			return;
 			// Don't want the variable increment in this frame
@@ -224,8 +224,8 @@ public void LateUpdate()
 		if (loadFlag && !startedLoadTimer)
 		{
 			// First frame the flag is updated, and when the loading screen appears
-			// In this frame we add a frame to the count to consider the frame that just elapsed
-			frameTimeCount++;
+			// In this frame we add time to the count to consider the frame that just elapsed
+			insideTimeCount = runTimeOnLoadEnd + currentElapsedTime - TimeCountStart; // Add elapsed time to the total time
 			// But activate the other flag to keep track of it
 			startedLoadTimer = true;
 			// For the autosplitter
@@ -233,7 +233,7 @@ public void LateUpdate()
 			//Save info in case we need to close the game
 			// We need to save it here because after OnApplicationQuit runs, things don't run as intended, so we will snapshot the last point that things worked basically
 			// Saving it every part in here
-			saveFrameTime = frameTimeCount;
+			saveTimeIn = insideTimeCount;
 			return;
 		}
 		if (!loadFlag && startedLoadTimer)
@@ -242,14 +242,17 @@ public void LateUpdate()
 			// So here we officially exit the loading mode
 			startedLoadTimer = false;
 			toCheatEngine = 420420;
-			saveFrameTime = frameTimeCount;
+			saveTimeIn = insideTimeCount;
+			// And we capture this snapshot in Time
+			TimeCountStart = currentElapsedTime;
+			runTimeOnLoadEnd = insideTimeCount;
 			return;
 		}
 		if (!startedLoadTimer && !loadFlag)
 		{
 			// The loading screen isn't present, so we update the frame count timer
-			frameTimeCount++;
-			saveFrameTime = frameTimeCount;
+			insideTimeCount = runTimeOnLoadEnd + currentElapsedTime - TimeCountStart; // Add elapsed time to the total time
+			saveTimeIn = insideTimeCount;
 		}
 	}
 	// Check every frame if we should start the timer
@@ -270,7 +273,10 @@ public void Update()
 	// This code takes care of the multiple instances, and keeps watching out for when this instance can become the main one
 	// It follows a type of rank ladder
 	//
-	saveRealTime = DateTime.Now;
+	saveSystemTime = DateTime.Now;
+	// Since realtimeSinceStartup depends on when in the frame you are we'll define it at the beginning of each frame
+	// Also this is where you should change if you want to change the timing method to a different one like Time.time
+	currentElapsedTime = Time.realtimeSinceStartup;
 	//Save the time variable (don't do it at LateUpdate because there it'll save the time of almost the next frame)
 	if (!isMainInstance)
 	{
@@ -304,20 +310,18 @@ public static void startTimer()
 	// It will initialize all the important variables as well
 	if (!isSpeedrunning)
 	{
-		ZoneTransitionService.toCheatEngine2 = ((ZoneTransitionService.toCheatEngine2 == 888) ? 777 : 888);
+		toCheatEngine2 = ((ZoneTransitionService.toCheatEngine2 == 888) ? 777 : 888);
 		// Only run this script if the run hasn't started yet
 		// First part is the regular things necessary to start the time and save it
 		isSpeedrunning = true;
 		isRunFinished = false;
-		realTimeCount = 0f;
-		frameTimeCount = 0;
-		StreamWriter boolWriter = new StreamWriter(Application.dataPath + "/IGT_Data/running");
-		boolWriter.WriteLine(isSpeedrunning.ToString());
-		boolWriter.Close();
+		outsideTimeCount = 0f;
+		insideTimeCount = 0;
+		saveData("running", "True");
 		// Command to start splits
 		shouldStartSplit = true;
 		splitsString = "";
-		//If the game is starting in a loading screen (only happens for Leaky Landing), this code will stop the timer from updating until we leave the loading
+		//If the game is starting in a loading screen, this code will stop the timer from updating until we leave the loading
 		if (LoadingController.isSpeedrunLoading)
 		{
 			startedLoadTimer = true;
@@ -325,8 +329,8 @@ public static void startTimer()
 	}
 	if (shouldStartSplit)
 	{
-		splitStartRealTime = realTimeCount;
-		splitStartFrameCount = frameTimeCount;
+		splitStartTimeOut = outsideTimeCount;
+		splitStartTimeIn = insideTimeCount;
 		shouldStartSplit = false;
 	}
 }
@@ -370,11 +374,11 @@ public static void stopTimer(string questName)
 			break;
 	}
 	// Information related to ending this split
-	string thisSplitTime = getTimer(frameTimeCount- splitStartFrameCount, realTimeCount - splitStartRealTime);
+	string thisSplitTime = getTimer(insideTimeCount - splitStartTimeIn, outsideTimeCount - splitStartTimeOut);
 	splitsString += thisSplitTime + "\n";
 	saveData("splits", splitsString);
 	shouldStartSplit = true;
-	ZoneTransitionService.toCheatEngine3 = ((ZoneTransitionService.toCheatEngine3 == 222) ? 333 : 222);
+	toCheatEngine3 = ((toCheatEngine3 == 222) ? 333 : 222);
 	if (reallyStop)
 	{
 		isRunFinished = true;
@@ -385,11 +389,11 @@ public static void stopTimer(string questName)
 }
 
 
-public static string getTimer(int frames, float realtime)
+public static string getTimer(float insidetime, float outsidetime)
 {
-	// This script gives the time based on the time between instances (real time in seconds) and the frame counted time
-	// So we divide the frames by the framerate and add it to the transition times
-	float total = frames/frameRate + realtime; // total in seconds
+	// This script gives the time based on the time between instances (real time in seconds) and the time inside the game
+	// And converts it into a neat string time
+	float total = insidetime + outsidetime; // total in seconds
 	//rest is smart conversions to print the timer elegantly
 	int hours = (int)(total / 3600f);
 	int minutes = (int)(total % 3600f / 60f);
@@ -531,7 +535,7 @@ void OnGUI() // Drawing the timer
 		else
 		{
 			// After starting timer get the proper time
-			timerText = getTimer(frameTimeCount, realTimeCount);
+			timerText = getTimer(insideTimeCount, outsideTimeCount);
 		}
 	}
 	if (isMainInstance && !needInit)
