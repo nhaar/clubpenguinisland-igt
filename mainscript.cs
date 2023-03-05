@@ -171,9 +171,15 @@ public void InitializeTimer()
 		// We will do this in a different place though
 		needInit = true;
 		// Also read the splits value
-		if (File.Exists(Application.dataPath + "/IGT_Data/splits"))
+		string dataPath = Application.dataPath + "\IGT_Data";
+		string splitPath = dataPath.Substring(0, dataPath.LastIndexOf(@"\")) + @"\Splits";
+		if (File.Exists(splitsPath + "\Splits.txt"))
 		{
-			splitsString = File.ReadAllText(Application.dataPath + "/IGT_Data/splits");
+			splitsString = File.ReadAllText(splitsPath + "\Splits.txt");
+		}
+		if (File.Exists(Application.dataPath + "/IGT_Data/splitb"))
+		{
+			shouldStartSplit = bool.Parse(File.ReadAllText(Application.dataPath + "/IGT_Data/splitb"));
 		}
 	}
 	
@@ -197,6 +203,7 @@ private void OnApplicationQuit()
 	saveData("timeout", outsideTimeCount.ToString());
 	saveData("splitf", splitStartTimeIn.ToString());
 	saveData("splitt", splitStartTimeOut.ToString());
+	saveData("splitb", shouldStartSplit.ToString());
 }
 
 public void LateUpdate()
@@ -382,7 +389,11 @@ public static void stopTimer(string questName)
 	// Information related to ending this split
 	string thisSplitTime = getTimer(insideTimeCount - splitStartTimeIn, outsideTimeCount - splitStartTimeOut);
 	splitsString += thisSplitTime + "\n";
-	saveData("splits", splitsString);
+	string dataPath = Application.dataPath + "\IGT_Data";
+	string splitPath = dataPath.Substring(0, dataPath.LastIndexOf(@"\")) + @"\Splits";
+	StreamWriter splitsWriter = new StreamWriter(splitPath + "\Splits.txt");
+	splitsWriter.Write(splitsString);
+	splitsWriter.Close();
 	shouldStartSplit = true;
 	toCheatEngine3 = ((toCheatEngine3 == 222) ? 333 : 222);
 	if (reallyStop)
@@ -572,7 +583,10 @@ public static void saveData(string dataname, string datacontent)
 void Awake()
 {
 		//...Other stuff
+		toCheatEngine2 = 777;
 		toCheatEngine3 = 222; // Make getting memory adress easier
+		string dataPath = Application.dataPath + "\IGT_Data";
+		string splitPath = dataPath.Substring(0, dataPath.LastIndexOf(@"\")) + @"\Splits";
 		if (!Directory.Exists(Application.dataPath + "/IGT_Data"))
 		{
 			Directory.CreateDirectory(Application.dataPath + "/IGT_Data");
@@ -580,6 +594,10 @@ void Awake()
 		if (!Directory.Exists(Application.dataPath + "/IGT_Data/InstancesLog"))
 		{
 			Directory.CreateDirectory(Application.dataPath + "/IGT_Data/InstancesLog");
+		}
+		if (!Directory.Exists(splitsPath))
+		{
+			Directory.CreateDirectory(splitsPath);
 		}
 		int processesNo = Process.GetProcessesByName("ClubPenguinIsland").Length; //Gets the number of processes open when the game is opened
 		// The way we'll keep track of what game is open is by storing each instance as a file in a folder, and when the instance is closed, we delete the file, so the other instances check for that file and then reorganize each other so it's accurate
