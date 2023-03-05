@@ -171,11 +171,11 @@ public void InitializeTimer()
 		// We will do this in a different place though
 		needInit = true;
 		// Also read the splits value
-		string dataPath = Application.dataPath + "\IGT_Data";
-		string splitPath = dataPath.Substring(0, dataPath.LastIndexOf(@"\")) + @"\Splits";
-		if (File.Exists(splitsPath + "\Splits.txt"))
+		string dataPath = Application.dataPath;
+		string splitsPath = dataPath.Substring(0, dataPath.Length - 22) + "Splits";
+		if (File.Exists(splitsPath + "/Splits.txt"))
 		{
-			splitsString = File.ReadAllText(splitsPath + "\Splits.txt");
+			splitsString = File.ReadAllText(splitsPath + "/Splits.txt");
 		}
 		if (File.Exists(Application.dataPath + "/IGT_Data/splitb"))
 		{
@@ -287,7 +287,7 @@ public void Update()
 	//
 	saveSystemTime = DateTime.Now;
 	// Since realtimeSinceStartup depends on when in the frame you are we'll define it at the beginning of each frame
-	currentElapsedTime = realtimeSinceStartup;
+	currentElapsedTime = Time.realtimeSinceStartup;
 	//Save the time variable (don't do it at LateUpdate because there it'll save the time of almost the next frame)
 	if (!isMainInstance)
 	{
@@ -389,9 +389,9 @@ public static void stopTimer(string questName)
 	// Information related to ending this split
 	string thisSplitTime = getTimer(insideTimeCount - splitStartTimeIn, outsideTimeCount - splitStartTimeOut);
 	splitsString += thisSplitTime + "\n";
-	string dataPath = Application.dataPath + "\IGT_Data";
-	string splitPath = dataPath.Substring(0, dataPath.LastIndexOf(@"\")) + @"\Splits";
-	StreamWriter splitsWriter = new StreamWriter(splitPath + "\Splits.txt");
+	string dataPath = Application.dataPath;
+	string splitsPath = dataPath.Substring(0, dataPath.Length - 22) + "Splits";
+	StreamWriter splitsWriter = new StreamWriter(splitsPath + "/Splits.txt");
 	splitsWriter.Write(splitsString);
 	splitsWriter.Close();
 	shouldStartSplit = true;
@@ -585,8 +585,8 @@ void Awake()
 		//...Other stuff
 		toCheatEngine2 = 777;
 		toCheatEngine3 = 222; // Make getting memory adress easier
-		string dataPath = Application.dataPath + "\IGT_Data";
-		string splitPath = dataPath.Substring(0, dataPath.LastIndexOf(@"\")) + @"\Splits";
+		string dataPath = Application.dataPath;
+		string splitsPath = dataPath.Substring(0, dataPath.Length - 22) + "Splits";
 		if (!Directory.Exists(Application.dataPath + "/IGT_Data"))
 		{
 			Directory.CreateDirectory(Application.dataPath + "/IGT_Data");
