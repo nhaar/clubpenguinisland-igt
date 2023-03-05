@@ -35,6 +35,7 @@ public static int IGTFontSize; // settings for IGT fontsize
 public static int IGTModeHeight;
 public static int warningFlag; // flag for the jarring warning
 public static int textAlignOption; // flag for whether text is right or left aligned
+public static int runCount;
 
 public void InitializeTimer()
 {
@@ -46,7 +47,7 @@ public void InitializeTimer()
 	// The two switches handle the cases of reading and creating the files
 	
 	string timerDataPath = Application.dataPath + "/IGT_Data/";
-	string[] fileArray = new string[] {"mode", "running", "ended", "timein", "timeout", "display", "splitin", "splitout", "displaymode", "fontsize", "align"};
+	string[] fileArray = new string[] {"mode", "running", "ended", "timein", "timeout", "display", "splitin", "splitout", "displaymode", "fontsize", "align", "runcount"};
 	// mode = timer mode // running = if is in a run // ended = if have finished a run // timein = time spent inside game // timeout = time spent outside game // display = display timer
 	string[] pathArray = new string[fileArray.Length];
 	// Create an array for the modes, turn that into array with the file path and below we will iterate through everything to properly initialize the data
@@ -101,6 +102,9 @@ public void InitializeTimer()
 					break;
 				case 10:
 					textAlignOption = int.Parse(fileContents);
+					break;
+				case 11:
+					runCount = int.Parse(fileContents);
 					break;
 				default:
 					break;
@@ -158,6 +162,9 @@ public void InitializeTimer()
 					initContent = "1";
 					textAlignOption = 1;
 					break;
+				case 11:
+					initContent = "0";
+					runCount = 0;
 				default:
 					break;
 			}
@@ -339,6 +346,9 @@ public static void startTimer()
 		{
 			startedLoadTimer = true;
 		}
+		//Increase run count for the history
+		runCount++;
+		saveData("runcount", runCount.ToString());
 	}
 	if (shouldStartSplit)
 	{
@@ -388,12 +398,24 @@ public static void stopTimer(string questName)
 	}
 	// Information related to ending this split
 	string thisSplitTime = getTimer(insideTimeCount - splitStartTimeIn, outsideTimeCount - splitStartTimeOut);
-	splitsString += thisSplitTime + "\n";
+	splitsString += getQuestTitle(questName) + " - " + thisSplitTime + "\n";
 	string dataPath = Application.dataPath;
 	string splitsPath = dataPath.Substring(0, dataPath.Length - 22) + "Splits";
 	StreamWriter splitsWriter = new StreamWriter(splitsPath + "/Splits.txt");
 	splitsWriter.Write(splitsString);
 	splitsWriter.Close();
+	if (timerMode != "IL")
+		{
+			string finalTime = "";
+			if (reallyStop)
+			{
+				finalTime = "Final Time: " + getTimer(insideTimeCount, outsideTimeCount);
+			}
+			string finishedSplits = splitsString + finalTime;
+			StreamWriter historyWriter = new StreamWriter(splitsPath + "/SplitsHistory/RunNo" + runCount.ToString() + ".txt");
+			historyWriter.Write(finishedSplits);
+			historyWriter.Close();
+		}
 	shouldStartSplit = true;
 	toCheatEngine3 = ((toCheatEngine3 == 222) ? 333 : 222);
 	if (reallyStop)
@@ -577,6 +599,96 @@ public static void saveData(string dataname, string datacontent)
 	streamWriter.Close();
 }
 
+public static string getQuestTitle(string questName)
+{
+	// Big switch script to get the quest names
+	switch (questName)
+	{
+		case "AAC001Q001LeakyShip":
+			return "Aunt Arctic Ch 1 Ep 1: Leaky Landing";
+		case "AAC001Q002Lava":
+			return "Aunt Arctic Ch 1 Ep 2: Rock the Volcano"; 
+		case "AAC001Q003Hatch":
+			return "Aunt Arctic Ch 1 Ep 3: Hatching a Plan";
+		case "AAC001Q004Crabs":
+			return "Aunt Arctic Ch 1 Ep 4: Mirror Mirror";
+		case "AAC001Q005Lighthouse":
+			return "Aunt Arctic Ch 1 Ep 5: Enlightenment";
+		case "AAC002Q001Machine":
+			return "Aunt Arctic Ch 2 Ep 1: Machine Malfunctions";
+		case "AAC002Q002View":
+			return "Aunt Arctic Ch 2 Ep 2: Point of View";
+		case "AAC002Q003Dots":
+			return "Aunt Arctic Ch 2 Ep 3: Dot's Disguises";
+		case "AAC002Q004Icy":
+			return "Aunt Arctic Ch 2 Ep 4: Icy Infiltration";
+		case "AAC002Q005Storm":
+			return "Aunt Arctic Ch 2 Ep 5: Gathering Storm";
+		case "AAC002Q006Stolen":
+			return "Aunt Arctic Ch 2 Ep 6: Hot Bottle";
+		case "AAC002Q007Click":
+			return "Aunt Arctic Ch 2 Ep 7: Double Click";
+		case "AAC002Q008Defender":
+			return "Aunt Arctic Ch 2 Ep 8: System Defender";
+		case "AAC002Q009Treasure":
+			return "Aunt Arctic Ch 2 Ep 9: Burying Treasure";
+		case "AAC002Q010Skyberg":
+			return "Aunt Arctic Ch 2 Ep 10: Skyberg Assault";
+		case "RHC001Q001TreasureQuest":
+			return "Rockhopper Ch 1 Ep 1: Bottled Maps";
+		case "RHC001Q002SwabTheDeck":
+			return "Rockhopper Ch 1 Ep 2: A Pirate's Life";
+		case "RHC001Q003CursedDummy":
+			return "Rockhopper Ch 1 Ep 3: Gongs Away";
+		case "RHC001Q004ShellRiddles":
+			return "Rockhopper Ch 1 Ep 4: Shell Game";
+		case "RHC001Q005CureTheCurse":
+			return "Rockhopper Ch 1 Ep 5: A Cursory Look";
+		case "RHC001Q006CursedTrail":
+			return "Rockhopper Ch 1 Ep 6: Trailing Along";
+		case "RHC001Q007NavigatorsPuzzle:":
+			return "Rockhopper Ch 1 Ep 7: Walk of Stars";
+		case "RHC001Q008GoodImpressions":
+			return "Rockhopper Ch 1 Ep 8: Good Impressions";
+		case "RHC001Q009BlackPearl":
+			return "Rockhopper Ch 1 Ep 9: The Black Pearl";
+		case "RHC001Q010CaptainsShare":
+			return "Rockhopper Ch 1 Ep 10: A Captain's Share";
+		case "DJC001Q001Plan":
+			return "DJ Cadence Ch 1 Ep 1: Make the Cut";
+		case "DJC001Q002Stars":
+			return "DJ Cadence Ch 1 Ep 2: Make It Work";
+		case "DJC001Q003Meeting":
+			return "DJ Cadence Ch 1 Ep 3: Make Up";
+		case "DJC001Q004Tea":
+			return "DJ Cadence Ch 1 Ep 4: Make It Better";
+		case "DJC001Q005Concert":
+			return "DJ Cadence Ch 1 Ep 5: Make It Big";
+		case "RKC001Q001Drop":
+			return "Rookie Ch 1 Ep 1: Drop In";
+		case "RKC001Q002Fix":
+			return "Rookie Ch 1 Ep 2: Fixer Upper";
+		case "RKC001Q003Tube":
+			return "Rookie Ch 1 Ep 3: Tubular Tech";
+		case "RKC001Q004Safety":
+			return "Rookie Ch 1 Ep 4: Safety First";
+		case "RKC001Q005Delivery":
+			return "Rookie Ch 1 Ep 5: Special Delivery";
+		case "RKC002Q001Peak":
+			return "Rookie Ch 2 Ep 1: Peak Fitness";
+		case "RKC002Q002Detector":
+			return "Rookie Ch 2 Ep 2: Better Yeti";
+		case "RKC002Q003Windy":
+			return "Rookie Ch 2 Ep 3: Windy Path";
+		case "RKC002Q004MakeGood":
+			return "Rookie Ch 2 Ep 4: Make Good";
+		case "RKC002Q005Colder":
+			return "Rookie Ch 2 Ep 5: Colder Climes";
+		default:
+			return "undefined";
+	}
+}
+
 
 // The awake script, which runs when the game is started
 
@@ -598,6 +710,7 @@ void Awake()
 		if (!Directory.Exists(splitsPath))
 		{
 			Directory.CreateDirectory(splitsPath);
+			Directory.CreateDirectory(splitsPath + "/SplitsHistory")
 		}
 		int processesNo = Process.GetProcessesByName("ClubPenguinIsland").Length; //Gets the number of processes open when the game is opened
 		// The way we'll keep track of what game is open is by storing each instance as a file in a folder, and when the instance is closed, we delete the file, so the other instances check for that file and then reorganize each other so it's accurate
