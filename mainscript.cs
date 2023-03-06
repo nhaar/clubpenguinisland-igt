@@ -188,6 +188,7 @@ public void InitializeTimer()
 		{
 			shouldStartSplit = bool.Parse(File.ReadAllText(Application.dataPath + "/IGT_Data/splitb"));
 		}
+		toCheatEngine3 = 222;
 	}
 	
 }
@@ -294,7 +295,7 @@ public void Update()
 	//
 	saveSystemTime = DateTime.Now;
 	// Since realtimeSinceStartup depends on when in the frame you are we'll define it at the beginning of each frame
-	currentElapsedTime = Time.realtimeSinceStartup;
+	currentElapsedTime = Time.time;
 	//Save the time variable (don't do it at LateUpdate because there it'll save the time of almost the next frame)
 	if (!isMainInstance)
 	{
@@ -344,6 +345,7 @@ public static void startTimer()
 		//If the game is starting in a loading screen, this code will stop the timer from updating until we leave the loading
 		if (LoadingController.isSpeedrunLoading)
 		{
+			toCheatEngine = 6969;
 			startedLoadTimer = true;
 		}
 		//Increase run count for the history
@@ -420,6 +422,7 @@ public static void stopTimer(string questName)
 	toCheatEngine3 = ((toCheatEngine3 == 222) ? 333 : 222);
 	if (reallyStop)
 	{
+		toCheatEngine3 = 111;
 		isRunFinished = true;
 		isSpeedrunning = false;
 		saveData("ended", isRunFinished.ToString());
@@ -695,8 +698,8 @@ public static string getQuestTitle(string questName)
 void Awake()
 {
 		//...Other stuff
-		toCheatEngine2 = 777;
-		toCheatEngine3 = 222; // Make getting memory adress easier
+		toCheatEngine2 = 999;
+		toCheatEngine3 = 111; // Make getting memory adress easier
 		string dataPath = Application.dataPath;
 		string splitsPath = dataPath.Substring(0, dataPath.Length - 22) + "Splits";
 		if (!Directory.Exists(Application.dataPath + "/IGT_Data"))
