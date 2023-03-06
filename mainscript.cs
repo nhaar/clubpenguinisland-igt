@@ -165,6 +165,7 @@ public void InitializeTimer()
 				case 11:
 					initContent = "0";
 					runCount = 0;
+					break;
 				default:
 					break;
 			}
@@ -713,7 +714,7 @@ void Awake()
 		if (!Directory.Exists(splitsPath))
 		{
 			Directory.CreateDirectory(splitsPath);
-			Directory.CreateDirectory(splitsPath + "/SplitsHistory")
+			Directory.CreateDirectory(splitsPath + "/SplitsHistory");
 		}
 		int processesNo = Process.GetProcessesByName("ClubPenguinIsland").Length; //Gets the number of processes open when the game is opened
 		// The way we'll keep track of what game is open is by storing each instance as a file in a folder, and when the instance is closed, we delete the file, so the other instances check for that file and then reorganize each other so it's accurate
