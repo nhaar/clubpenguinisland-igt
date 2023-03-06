@@ -54,7 +54,7 @@ public void ResetRun()
 	ZoneTransitionService.isRunFinished = false;
 	ZoneTransitionService.saveData("running", "False");
 	ZoneTransitionService.saveData("ended", "False");
-	ZoneTransitionService.toCheatEngine3 = 111;
+	ZoneTransitionService.toCheatEngine2 = 999;
 }
 
 //Display Timer Settings
