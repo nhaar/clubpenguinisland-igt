@@ -295,8 +295,8 @@ public void Update()
 	// It follows a type of rank ladder
 	//
 	saveSystemTime = DateTime.Now;
-	// Since realtimeSinceStartup depends on when in the frame you are we'll define it at the beginning of each frame
-	currentElapsedTime = Time.time;
+	// I've picked the timing method to be Time.unscaledTime because it only generates one value per frame and this game does scale so we need it for real time
+	currentElapsedTime = Time.unscaledTime;
 	//Save the time variable (don't do it at LateUpdate because there it'll save the time of almost the next frame)
 	if (!isMainInstance)
 	{
