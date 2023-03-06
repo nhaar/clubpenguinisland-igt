@@ -423,7 +423,7 @@ public static void stopTimer(string questName)
 	toCheatEngine3 = ((toCheatEngine3 == 222) ? 333 : 222);
 	if (reallyStop)
 	{
-		toCheatEngine3 = 111;
+		toCheatEngine2 = 999;
 		isRunFinished = true;
 		isSpeedrunning = false;
 		saveData("ended", isRunFinished.ToString());
