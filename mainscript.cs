@@ -37,6 +37,8 @@ public static int warningFlag; // flag for the jarring warning
 public static int textAlignOption; // flag for whether text is right or left aligned
 public static int runCount;
 
+public static bool finishedLeakyLandingNormally = false; // To make sure only one of the methods work on Leaky Landing
+
 public void InitializeTimer()
 {
 	// This script is meant to enable all timer functions. It runs once this becomes the main instance, which is the one that controls the timer
@@ -189,7 +191,6 @@ public void InitializeTimer()
 		{
 			shouldStartSplit = bool.Parse(File.ReadAllText(Application.dataPath + "/IGT_Data/splitb"));
 		}
-		toCheatEngine3 = 222;
 	}
 	
 }
@@ -224,6 +225,24 @@ public void LateUpdate()
 	// And of course lock it in case we are not in a run
 	if (isMainInstance && isSpeedrunning)
 	{
+		//This first check is to split/end timer in Leaky Landing
+		//Receiving information from LoadingController
+		if (LoadingController.stopLeaky)
+		{
+			LoadingController.stopLeaky = false;
+
+			//Only stop the timer if haven't finished leaky landing normally
+			//Else simply reset every variable
+			if (finishedLeakyLandingNormally)
+			{
+				finishedLeakyLandingNormally = false;
+			}
+			else
+			{
+                stopTimer("AAC001Q001LeakyShip");
+            }
+		}
+		
 		if(needInit && insideTimeCount > initialTimeIn + 0.050f)
 		{
 			// Because this script doesn't update very well in the start, we wait until it starts updating to actually use the real time
@@ -349,8 +368,12 @@ public static void startTimer()
 			toCheatEngine = 6969;
 			startedLoadTimer = true;
 		}
-		//Increase run count for the history
-		runCount++;
+
+		//Increase run count for the history if the run goal is not an IL run
+		if (timerMode != "IL")
+		{
+			runCount++;
+		}
 		saveData("runcount", runCount.ToString());
 	}
 	if (shouldStartSplit)
@@ -437,15 +460,15 @@ public static string getTimer(float insidetime, float outsidetime)
 	// This script gives the time based on the time between instances (real time in seconds) and the time inside the game
 	// And converts it into a neat string time
 	float total = insidetime + outsidetime; // total in seconds
+
+	// rounds to nearest ms
+	total = Mathf.Round(total * 1000)/1000f;
+
 	//rest is smart conversions to print the timer elegantly
 	int hours = (int)(total / 3600f);
 	int minutes = (int)(total % 3600f / 60f);
 	int seconds = (int)(total % 60f);
-	int miliseconds = (int)Mathf.Round(total % 1f * 1000f);
-	if (miliseconds == 1000)
-	{
-		miliseconds = 0;
-	}
+	int miliseconds = (int) ( (total % 1f) * 1000f);
 	string timerFormat;
 	if (hours == 0)
 	{
