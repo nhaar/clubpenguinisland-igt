@@ -3,6 +3,7 @@
 //@ UnityShared LoadingController
 
 public static bool isSpeedrunLoading; // Variable to keep track if the game is loading
+public static bool stopLeaky; // Variable to see if we should stop Leaky Landing
 
 //turning it on because the load started
 
