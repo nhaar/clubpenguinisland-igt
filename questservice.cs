@@ -29,4 +29,10 @@ public IEnumerator ShowStartQuestSplashscreen(Quest quest)
 public void EndQuest(GameObject player, string questName)
 {
 	ZoneTransitionService.stopTimer(questName);
+
+	// If leaky landing, prevent from splitting again
+	if (questName == "AAC001Q001LeakyShip")
+	{
+		ZoneTransitionService.finishedLeakyLandingNormally = true;
+	}
 }
