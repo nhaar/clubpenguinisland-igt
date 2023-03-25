@@ -398,7 +398,7 @@ public static void stopTimer(string questName)
 			}
 			break;
 		case "RH":
-			if (questName == "RHC001C010CaptainsShare")
+			if (questName == "RHC001Q010CaptainsShare")
 			{
 				reallyStop = true;
 			}
