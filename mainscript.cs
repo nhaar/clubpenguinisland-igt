@@ -9,11 +9,11 @@ using System. IO;
 public static bool isMainInstance; // Keeps track on whether this instance is the main instance, which will control the timer, as opposed to an instance running in the background
 public static int instanceNo; // Keeps track on which is the number of the instance in the order that it was opened
 public static string timerMode; // Keeps track of the timer mode, which controls what ends the timer
-public static float currentElapsedTime; // to keep track of the time each frame
-public static float outsideTimeCount; // All the time spent outside the game, between closing instances
-public static float insideTimeCount; // All the time spent in the actual game
-public static float TimeCountStart; // We will use relative time to add to the timer, we  will update this whenever we want to start counting
-public static float runTimeOnLoadEnd; // To keep track of the time at the end of each load
+public static double currentElapsedTime; // to keep track of the time each frame
+public static double outsideTimeCount; // All the time spent outside the game, between closing instances
+public static double insideTimeCount; // All the time spent in the actual game
+public static double TimeCountStart; // We will use relative time to add to the timer, we  will update this whenever we want to start counting
+public static double runTimeOnLoadEnd; // To keep track of the time at the end of each load
 public static bool isSpeedrunning; // Keeps track of whether the time is running or not
 public static bool isRunFinished; // Keeps track if the time is currently stopped after completing a run
 public static int displayTimerFlag; // Keeps track if the time should be displayed
@@ -22,12 +22,12 @@ public static int toCheatEngine; // Variables meant to be read by livesplit, use
 public static int toCheatEngine2;
 public static int toCheatEngine3;
 public static DateTime saveSystemTime; // These two variables will hold the information of the current times for when the game closes
-public static float saveTimeIn;
+public static double saveTimeIn;
 public static bool needInit; // Will be used to keep track of whether the time between instances needs to be initialized
-public static float initialTimeIn;
+public static double initialTimeIn;
 public static bool startTimeNow; // The timer will start in this frame if this is true
-public static float splitStartTimeIn; // These two variables will be used to keep track of splits and will keep track of the time at the beginning of each split
-public static float splitStartTimeOut;
+public static double splitStartTimeIn; // These two variables will be used to keep track of splits and will keep track of the time at the beginning of each split
+public static double splitStartTimeOut;
 public static bool shouldStartSplit;
 public static string splitsString; // String that has splits split across lines
 public static int displayMode; // settings for displaying the mode
@@ -78,22 +78,22 @@ public void InitializeTimer()
 					isRunFinished = bool.Parse(fileContents);
 					break;
 				case 3:
-					insideTimeCount = float.Parse(fileContents);
+					insideTimeCount = double.Parse(fileContents);
 					initialTimeIn = insideTimeCount;
 					runTimeOnLoadEnd = insideTimeCount;
 					TimeCountStart = currentElapsedTime;
 					break;
 				case 4:
-					outsideTimeCount = float.Parse(fileContents);
+					outsideTimeCount = double.Parse(fileContents);
 					break;
 				case 5:
 					displayTimerFlag = int.Parse(fileContents);
 					break;
 				case 6:
-					splitStartTimeIn = float.Parse(fileContents);
+					splitStartTimeIn = double.Parse(fileContents);
 					break;
 				case 7:
-					splitStartTimeOut = float.Parse(fileContents);
+					splitStartTimeOut = double.Parse(fileContents);
 					break;
 				case 8:
 					displayMode = int.Parse(fileContents);
@@ -251,7 +251,7 @@ public void LateUpdate()
 			needInit = false;
 			DateTime lastInstanceClosed = DateTime.Parse(File.ReadAllText(Application.dataPath + "/IGT_Data/close"));
 			TimeSpan instanceDelta = saveSystemTime - lastInstanceClosed;
-			outsideTimeCount += (float)instanceDelta.TotalSeconds;
+			outsideTimeCount += (double)instanceDelta.TotalSeconds;
 			//Add the to the real time the time spent between instances
 			insideTimeCount = initialTimeIn;
 			TimeCountStart = currentElapsedTime;
@@ -455,20 +455,20 @@ public static void stopTimer(string questName)
 }
 
 
-public static string getTimer(float insidetime, float outsidetime)
+public static string getTimer(double insidetime, double outsidetime)
 {
 	// This script gives the time based on the time between instances (real time in seconds) and the time inside the game
 	// And converts it into a neat string time
-	float total = insidetime + outsidetime; // total in seconds
+	double total = insidetime + outsidetime; // total in seconds
 
 	// rounds to nearest ms
-	total = Mathf.Round(total * 1000)/1000f;
+	total = Math.Round(total * 1000)/1000;
 
 	//rest is smart conversions to print the timer elegantly
-	int hours = (int)(total / 3600f);
-	int minutes = (int)(total % 3600f / 60f);
-	int seconds = (int)(total % 60f);
-	int miliseconds = (int) ( (total % 1f) * 1000f);
+	int hours = (int)(total / 3600);
+	int minutes = (int)(total % 3600 / 60);
+	int seconds = (int)(total % 60);
+	int miliseconds = (int) ( (total % 1) * 1000);
 	string timerFormat;
 	if (hours == 0)
 	{
