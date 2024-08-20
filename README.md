@@ -51,7 +51,7 @@ The repository contains C# code which is injected via dnSpy. There are three `dl
 10. Edit add class members, copy and paste all of `gamesettings.cs` into and compile
 11. Save the `dll`
 
-# ClubPenguinClient
+## ClubPenguinClient
 
 1. Go to `ClubPenguin.Net.Client` -> `SetStatusOperation`
 2. Edit the `SetStatus` method as in `setstatus.cs`
