@@ -2,7 +2,8 @@
 // If going to change it, needs to change all the references to ZoneTransitionService in other objects, and also be careful not to duplicate voids, properly add them
 
 using System.Diagnostics;
-using System. IO;
+using System.IO;
+using System.Globalization;
 
 // Initialize all the variables
 
@@ -92,22 +93,22 @@ public void InitializeTimer()
 					isRunFinished = bool.Parse(fileContents);
 					break;
 				case 3:
-					insideTimeCount = double.Parse(fileContents);
+					insideTimeCount = double.Parse(fileContents, CultureInfo.InvariantCulture);
 					initialTimeIn = insideTimeCount;
 					runTimeOnLoadEnd = insideTimeCount;
 					TimeCountStart = currentElapsedTime;
 					break;
 				case 4:
-					outsideTimeCount = double.Parse(fileContents);
+					outsideTimeCount = double.Parse(fileContents, CultureInfo.InvariantCulture);
 					break;
 				case 5:
 					displayTimerFlag = int.Parse(fileContents);
 					break;
 				case 6:
-					splitStartTimeIn = double.Parse(fileContents);
+					splitStartTimeIn = double.Parse(fileContents, CultureInfo.InvariantCulture);
 					break;
 				case 7:
-					splitStartTimeOut = double.Parse(fileContents);
+					splitStartTimeOut = double.Parse(fileContents, CultureInfo.InvariantCulture);
 					break;
 				case 8:
 					displayMode = int.Parse(fileContents);
@@ -123,10 +124,10 @@ public void InitializeTimer()
 					runCount = int.Parse(fileContents);
 					break;
 				case 12:
-					lastSplitTimeInEnd = double.Parse(fileContents);
+					lastSplitTimeInEnd = double.Parse(fileContents, CultureInfo.InvariantCulture);
 					break;
 				case 13:
-					lastSplitTimeOutEnd = double.Parse(fileContents);
+					lastSplitTimeOutEnd = double.Parse(fileContents, CultureInfo.InvariantCulture);
 					break;
 				case 14:
 					inIlSegment = bool.Parse(fileContents);
@@ -252,13 +253,13 @@ private void OnApplicationQuit()
 	// Write what time this is being closed and the timer data for this run
 	// Since this script actually runs a bit after the frames stop updating, I have prepared the variables saveSystemTime and insideTimeCount at a specific snapshot
 	saveData("close", saveSystemTime.ToString("yyyy-MM-dd HH:mm:ss.fff"));
-	saveData("timein", insideTimeCount.ToString());
-	saveData("timeout", outsideTimeCount.ToString());
-	saveData("splitf", splitStartTimeIn.ToString());
-	saveData("splitt", splitStartTimeOut.ToString());
-	saveData("splitb", shouldStartSplit.ToString());
-	saveData("lastsplitin", lastSplitTimeInEnd.ToString());
-	saveData("lastsplitout", lastSplitTimeOutEnd.ToString());
+	saveData("timein", insideTimeCount.ToString(CultureInfo.InvariantCulture));
+	saveData("timeout", outsideTimeCount.ToString(CultureInfo.InvariantCulture));
+	saveData("splitf", splitStartTimeIn.ToString(CultureInfo.InvariantCulture));
+	saveData("splitt", splitStartTimeOut.ToString(CultureInfo.InvariantCulture));
+	saveData("splitb", shouldStartSplit.ToString(CultureInfo.InvariantCulture));
+	saveData("lastsplitin", lastSplitTimeInEnd.ToString(CultureInfo.InvariantCulture));
+	saveData("lastsplitout", lastSplitTimeOutEnd.ToString(CultureInfo.InvariantCulture));
 	saveData("inil", inIlSegment.ToString());
 }
 
