@@ -723,7 +723,7 @@ public static string getQuestTitle(string questName)
 			return "Rockhopper Ch 1 Ep 5: A Cursory Look";
 		case "RHC001Q006CursedTrail":
 			return "Rockhopper Ch 1 Ep 6: Trailing Along";
-		case "RHC001Q007NavigatorsPuzzle:":
+		case "RHC001Q007NavigatorsPuzzle":
 			return "Rockhopper Ch 1 Ep 7: Walk of Stars";
 		case "RHC001Q008GoodImpressions":
 			return "Rockhopper Ch 1 Ep 8: Good Impressions";
