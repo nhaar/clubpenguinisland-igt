@@ -233,6 +233,7 @@ public int countOpenInstances()
 	return Directory.GetFiles(Application.dataPath + "/IGT_Data/InstancesLog").Length + 1;
 }
 
+// TO-do: this should be automated somehow, it is too easy to forget to update it
 private void OnApplicationQuit()
 {
 	// The script will handle transmitting information to the next instances
@@ -246,6 +247,9 @@ private void OnApplicationQuit()
 	saveData("splitf", splitStartTimeIn.ToString());
 	saveData("splitt", splitStartTimeOut.ToString());
 	saveData("splitb", shouldStartSplit.ToString());
+	saveData("lastsplitin", lastSplitTimeInEnd.ToString());
+	saveData("lastsplitout", lastSplitTimeOutEnd.ToString());
+	saveData("inil", inIlSegment.ToString());
 }
 
 public void LateUpdate()
