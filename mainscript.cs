@@ -48,6 +48,9 @@ public static double lastSplitTimeOutEnd;
 // whether or not in an IL segment (false would be outside run or between levels)
 public static bool inIlSegment;
 
+// 3 values: "always" | "outside" | "never"
+public static string SegmentTimerState;
+
 public void InitializeTimer()
 {
 	// This script is meant to enable all timer functions. It runs once this becomes the main instance, which is the one that controls the timer
@@ -60,7 +63,7 @@ public void InitializeTimer()
 	// To-do: this system is... not good. Refactor
 
 	string timerDataPath = Application.dataPath + "/IGT_Data/";
-	string[] fileArray = new string[] {"mode", "running", "ended", "timein", "timeout", "display", "splitin", "splitout", "displaymode", "fontsize", "align", "runcount", "lastsplitin", "lastsplitout", "inil"};
+	string[] fileArray = new string[] {"mode", "running", "ended", "timein", "timeout", "display", "splitin", "splitout", "displaymode", "fontsize", "align", "runcount", "lastsplitin", "lastsplitout", "inil", "displaysegment"};
 	// mode = timer mode // running = if is in a run // ended = if have finished a run // timein = time spent inside game // timeout = time spent outside game // display = display timer
 	string[] pathArray = new string[fileArray.Length];
 	// Create an array for the modes, turn that into array with the file path and below we will iterate through everything to properly initialize the data
@@ -127,6 +130,9 @@ public void InitializeTimer()
 					break;
 				case 14:
 					inIlSegment = bool.Parse(fileContents);
+					break;
+				case 15:
+					SegmentTimerState = fileContents.Trim();
 					break;
 				default:
 					break;
@@ -199,6 +205,10 @@ public void InitializeTimer()
 				case 14:
 					initContent = "False";
 					inIlSegment = false;
+					break;
+				case 15:
+					initContent = "always";
+					SegmentTimerState = initContent;
 					break;
 				default:
 					break;
@@ -604,6 +614,7 @@ void OnGUI() // Drawing the timer
 	// text for the secondary timer, which shows the IL time
 	string ilTimerText = "";
 	bool displayText = false;
+	bool displaySegmentText = false;
 	bool displaySecondText = false;
 	//The different situations for the timer
 	if (!isSpeedrunning)
@@ -617,6 +628,8 @@ void OnGUI() // Drawing the timer
 		{
 			displaySecondText = true;
 		}
+		// if not running, only not display if set to never
+		displaySegmentText = SegmentTimerState != "never";
 	}
 	else
 	{
@@ -629,6 +642,7 @@ void OnGUI() // Drawing the timer
 		{
 			displaySecondText = true;
 		}
+		displaySegmentText = SegmentTimerState == "always" || (SegmentTimerState == "outside" && !inIlSegment);
 	}
 	if (displayMode == 4)
 	{
@@ -641,33 +655,44 @@ void OnGUI() // Drawing the timer
 			// Before runs
 			// Standard 0 second time display
 			timerText = "0.000";
-			ilTimerText = "0.000";
 		}
 		else
 		{
 			// After starting timer get the proper time
 			timerText = getTimer(insideTimeCount, outsideTimeCount);
-			if (inIlSegment)
-			{
-				ilTimerText = getTimer(insideTimeCount - splitStartTimeIn, outsideTimeCount - splitStartTimeOut);
-			}
-			else
-			{
-				ilTimerText = getTimer(lastSplitTimeInEnd - splitStartTimeIn, lastSplitTimeOutEnd - splitStartTimeOut);
-			}
 		}
 	}
 	if (isMainInstance && !needInit)
 		//Only show timer if the right display flag is set, is main timer and the timer isn't messed up from the first frames initializing
 	{
+		// used to know what height we will place each line
+		int currentLine = 0;
 		if (displayText)
 		{
 			textOutline(10, 10, timerText, IGTFontSize); // the speedrun timer
-			textOutline(10, IGTModeHeight, ilTimerText, IGTFontSize);
+			currentLine++;
+			if (displaySegmentText && timerMode != "IL")
+			{
+				if (!isSpeedrunning && !isRunFinished)
+				{
+					ilTimerText = "0.000";
+				}
+				else if (inIlSegment)
+				{
+					ilTimerText = getTimer(insideTimeCount - splitStartTimeIn, outsideTimeCount - splitStartTimeOut);
+				}
+				else
+				{
+					ilTimerText = getTimer(lastSplitTimeInEnd - splitStartTimeIn, lastSplitTimeOutEnd - splitStartTimeOut);
+
+				}
+				textOutline(10, IGTModeHeight * currentLine, ilTimerText, IGTFontSize);
+				currentLine++;
+			}
 		}
 		if (displaySecondText)
 		{
-			textOutline(10, IGTModeHeight * 2, ZoneTransitionService.timerMode, IGTFontSize); // the mode of the timer
+			textOutline(10, IGTModeHeight * currentLine, ZoneTransitionService.timerMode, IGTFontSize); // the mode of the timer
 		}
 	}
 }

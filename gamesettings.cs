@@ -44,6 +44,35 @@ public void ChangeTimerMode(TimerModes mode)
 	ZoneTransitionService.timerMode = newMode;
 }
 
+// choices for segment timer
+public enum SegmentTimerMode
+{
+	Always,
+	OutsideSegments,
+	Never
+}
+
+[PublicTweak]
+[Invokable("Timer Settings.Segment Timer", Description = "\n\n\n\n\n\nChooses when the secondary segment timer should be on.\nPay attention that the timer is never on if the timer is in IL mode and that the segment timer can only be visible if the main timer is also visible.\nAlways: Segment timer will always be on\nOutsideSegments:The timer will show up when it is not running\nNever: It will never be visible")]
+public void ChangeSegmentTimerMode(SegmentTimerMode segmentTimerMode)
+{
+	string newMode = "always";
+	switch (segmentTimerMode)
+	{
+		case SegmentTimerMode.Always:
+			newMode = "always";
+			break;
+		case SegmentTimerMode.OutsideSegments:
+			newMode = "outside";
+			break;
+		case SegmentTimerMode.Never:
+			newMode = "never";
+			break;
+	}
+	ZoneTransitionService.SegmentTimerState = newMode;
+	ZoneTransitionService.saveData("displaysegment", newMode);
+	
+}
 
 //Reset the timer/stop speedrunning
 [PublicTweak]
