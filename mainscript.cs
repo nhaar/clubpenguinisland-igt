@@ -133,11 +133,11 @@ public void InitializeTimer()
 					break;
 				case 3:
 					initContent = "0";
-					insideTimeCount = 0f;
+					insideTimeCount = 0;
 					break;
 				case 4:
 					initContent = "0";
-					outsideTimeCount = 0f;
+					outsideTimeCount = 0;
 					break;
 				case 5:
 					initContent = "1";
@@ -145,11 +145,11 @@ public void InitializeTimer()
 					break;
 				case 6:
 					initContent = "0";
-					splitStartTimeIn = 0f;
+					splitStartTimeIn = 0;
 					break;
 				case 7:
 					initContent = "0";
-					splitStartTimeOut = 0f;
+					splitStartTimeOut = 0;
 					break;
 				case 8:
 					initContent = "4";
