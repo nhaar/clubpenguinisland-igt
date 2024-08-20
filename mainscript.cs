@@ -39,6 +39,15 @@ public static int runCount;
 
 public static bool finishedLeakyLandingNormally = false; // To make sure only one of the methods work on Leaky Landing
 
+// To-do: refactoring a lot of these as vector (in, out)
+
+// keeps track of the times the last IL segment ended
+public static double lastSplitTimeInEnd;
+public static double lastSplitTimeOutEnd;
+
+// whether or not in an IL segment (false would be outside run or between levels)
+public static bool inIlSegment;
+
 public void InitializeTimer()
 {
 	// This script is meant to enable all timer functions. It runs once this becomes the main instance, which is the one that controls the timer
@@ -48,8 +57,10 @@ public void InitializeTimer()
 	// The fileArray contains names for the paths
 	// The two switches handle the cases of reading and creating the files
 	
+	// To-do: this system is... not good. Refactor
+
 	string timerDataPath = Application.dataPath + "/IGT_Data/";
-	string[] fileArray = new string[] {"mode", "running", "ended", "timein", "timeout", "display", "splitin", "splitout", "displaymode", "fontsize", "align", "runcount"};
+	string[] fileArray = new string[] {"mode", "running", "ended", "timein", "timeout", "display", "splitin", "splitout", "displaymode", "fontsize", "align", "runcount", "lastsplitin", "lastsplitout", "inil"};
 	// mode = timer mode // running = if is in a run // ended = if have finished a run // timein = time spent inside game // timeout = time spent outside game // display = display timer
 	string[] pathArray = new string[fileArray.Length];
 	// Create an array for the modes, turn that into array with the file path and below we will iterate through everything to properly initialize the data
@@ -107,6 +118,15 @@ public void InitializeTimer()
 					break;
 				case 11:
 					runCount = int.Parse(fileContents);
+					break;
+				case 12:
+					lastSplitTimeInEnd = double.Parse(fileContents);
+					break;
+				case 13:
+					lastSplitTimeOutEnd = double.Parse(fileContents);
+					break;
+				case 14:
+					inIlSegment = bool.Parse(fileContents);
 					break;
 				default:
 					break;
@@ -167,6 +187,18 @@ public void InitializeTimer()
 				case 11:
 					initContent = "0";
 					runCount = 0;
+					break;
+				case 12:
+					initContent = "0";
+					lastSplitTimeInEnd = 0;
+					break;
+				case 13:
+					initContent = "0";
+					lastSplitTimeOutEnd = 0;
+					break;
+				case 14:
+					initContent = "False";
+					inIlSegment = false;
 					break;
 				default:
 					break;
@@ -380,6 +412,7 @@ public static void startTimer()
 	{
 		splitStartTimeOut = outsideTimeCount;
 		splitStartTimeIn = insideTimeCount;
+		inIlSegment = true;
 		shouldStartSplit = false;
 	}
 }
@@ -424,6 +457,9 @@ public static void stopTimer(string questName)
 	}
 	// Information related to ending this split
 	string thisSplitTime = getTimer(insideTimeCount - splitStartTimeIn, outsideTimeCount - splitStartTimeOut);
+	lastSplitTimeInEnd = insideTimeCount;
+	lastSplitTimeOutEnd = outsideTimeCount;
+	inIlSegment = false;
 	splitsString += getQuestTitle(questName) + " - " + thisSplitTime + "\n";
 	string dataPath = Application.dataPath;
 	string splitsPath = dataPath.Substring(0, dataPath.Length - 22) + "Splits";
@@ -560,6 +596,9 @@ void OnGUI() // Drawing the timer
 		}
 	}
 	string timerText = ""; // define the text for the timer
+
+	// text for the secondary timer, which shows the IL time
+	string ilTimerText = "";
 	bool displayText = false;
 	bool displaySecondText = false;
 	//The different situations for the timer
@@ -596,12 +635,22 @@ void OnGUI() // Drawing the timer
 		if (!isSpeedrunning && !isRunFinished)
 		{
 			// Before runs
-			timerText = "0.000"; // Standard 0 second time display
+			// Standard 0 second time display
+			timerText = "0.000";
+			ilTimerText = "0.000";
 		}
 		else
 		{
 			// After starting timer get the proper time
 			timerText = getTimer(insideTimeCount, outsideTimeCount);
+			if (inIlSegment)
+			{
+				ilTimerText = getTimer(insideTimeCount - splitStartTimeIn, outsideTimeCount - splitStartTimeOut);
+			}
+			else
+			{
+				ilTimerText = getTimer(lastSplitTimeInEnd - splitStartTimeIn, lastSplitTimeOutEnd - splitStartTimeOut);
+			}
 		}
 	}
 	if (isMainInstance && !needInit)
@@ -610,10 +659,11 @@ void OnGUI() // Drawing the timer
 		if (displayText)
 		{
 			textOutline(10, 10, timerText, IGTFontSize); // the speedrun timer
+			textOutline(10, IGTModeHeight, ilTimerText, IGTFontSize);
 		}
 		if (displaySecondText)
 		{
-			textOutline(10, IGTModeHeight, ZoneTransitionService.timerMode, IGTFontSize); // the mode of the timer
+			textOutline(10, IGTModeHeight * 2, ZoneTransitionService.timerMode, IGTFontSize); // the mode of the timer
 		}
 	}
 }
